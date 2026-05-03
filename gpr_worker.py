@@ -67,7 +67,7 @@ y_lon_train_n = (y_lon_train - lon_mean) / lon_std
 
 import json
 
-kernel_A = (Matern(length_scale=1.0, length_scale_bounds=(1e-2, 1e2), nu=2.5)
+kernel_A = C(1.0, (1e-3, 1e3))*(Matern(length_scale=1.0, length_scale_bounds=(1e-2, 1e2), nu=2.5)
             + WhiteKernel(noise_level=0.1, noise_level_bounds=(1e-5, 10)))
 
 kernel_B = (C(1.0, (1e-3, 1e3))
@@ -125,12 +125,12 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
       gpr_results_m["model_type"]= "GPR"
       gpr_results_m["parameters"] = {
         "kernel": kernel_name,
-        "lat_nu": gpr_lat.kernel_.get_params()['k1__nu'],
-        "lon_nu": gpr_lon.kernel_.get_params()['k1__nu'],
-        "lat_length_scale": gpr_lat.kernel_.get_params()['k1__length_scale'],
-        "lon_length_scale": gpr_lon.kernel_.get_params()['k1__length_scale'],
-        "lat_noise_level": gpr_lat.kernel_.get_params()['k2__noise_level'],
-        "lon_noise_level": gpr_lon.kernel_.get_params()['k2__noise_level'],
+        "lat_nu": gpr_lat.kernel_.get_params()['k2__k1__nu'],
+        "lon_nu": gpr_lon.kernel_.get_params()['k2__k1__nu'],
+        "lat_length_scale": gpr_lat.kernel_.get_params()['k2__k1__length_scale'],
+        "lon_length_scale": gpr_lon.kernel_.get_params()['k2__k1__length_scale'],
+        "lat_noise_level": gpr_lat.kernel_.get_params()['k2__k2__noise_level'],
+        "lon_noise_level": gpr_lon.kernel_.get_params()['k2__k2__noise_level'],
         "scaler": "StandardScaler"
       }
       gpr_results_m["summary_metrics"] = {
@@ -154,7 +154,7 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
             "std_lon": std_lon[i]
           }
         )
-      with open('gpr_matern_00.json', 'w', encoding='utf-8') as f:
+      with open('gpr_matern_07.json', 'w', encoding='utf-8') as f:
         json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
     else:
       gpr_results_r["model_type"] = "GPR"
@@ -188,7 +188,7 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
             "std_lon": std_lon[i]
           }
         )
-      with open('gpr_crbf_00.json', 'w', encoding='utf-8') as f:
+      with open('gpr_crbf_07.json', 'w', encoding='utf-8') as f:
         json.dump(gpr_results_r, f, ensure_ascii=False, indent=4)
 
 
