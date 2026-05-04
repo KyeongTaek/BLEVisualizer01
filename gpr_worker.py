@@ -40,6 +40,7 @@ from sklearn.gaussian_process.kernels import (
 from sklearn.preprocessing import StandardScaler
 import numpy as np
 
+# A가 정해준 데이터셋(.csv)을 공통으로 사용하기 위함
 X_train = np.loadtxt('x_train_1833.csv', delimiter=',', skiprows=1)
 X_test = np.loadtxt('x_test_1833.csv', delimiter=',', skiprows=1)
 y_lat_train = np.loadtxt('y_lat_train_1833.csv', delimiter=',', skiprows=1)
@@ -80,6 +81,7 @@ gpr_results_r = {}
 for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
     print(f"\n[{kernel_name} 커널] 학습 중...")
 
+    # gpr 모델
     gpr_lat = GaussianProcessRegressor(
         kernel=kernel, alpha=1e-6,
         n_restarts_optimizer=5, random_state=42
@@ -121,7 +123,7 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
     print(f"  최적 커널:   {gpr_lon.kernel_}")
 
 
-    if kernel_name == "Matern":
+    if kernel_name == "Matern": # Matern 커널의 경우에 json으로 만드는 부분
       gpr_results_m["model_type"]= "GPR"
       gpr_results_m["parameters"] = {
         "kernel": kernel_name,
@@ -156,7 +158,7 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         )
       with open('gpr_matern_07.json', 'w', encoding='utf-8') as f:
         json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
-    else:
+    else: # rbf 커널인 경우에 json으로 만드는 부분
       gpr_results_r["model_type"] = "GPR"
       gpr_results_r["parameters"] = {
         "kernel": kernel_name,
