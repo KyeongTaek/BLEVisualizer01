@@ -5,7 +5,7 @@ from sklearn.impute import SimpleImputer
  
 def get_processed_data():
     # 데이터 로드 
-    df = pd.read_csv('all_sensor_data.csv', sep='\t')
+    df = pd.read_csv('all_sensor_data_merge.csv', encoding='utf-8-sig')
     print(f"전체 데이터: {len(df)}행")
  
     # GPS 필터링
@@ -67,6 +67,7 @@ def get_processed_data():
  
     # CSV 저장
     mac_cols = list(radio_map.columns)
+
  
     pd.DataFrame(X_train, columns=mac_cols).to_csv('X_train.csv', index=False)
     pd.DataFrame(X_test,  columns=mac_cols).to_csv('X_test.csv',  index=False)
