@@ -41,10 +41,10 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 # A가 정해준 데이터셋(.csv)을 공통으로 사용하기 위함
-X_train = np.loadtxt('./data provider/X_train.csv', delimiter=',', skiprows=1)
-X_test = np.loadtxt('./data provider/X_test.csv', delimiter=',', skiprows=1)
-y_train = np.loadtxt('./data provider/y_train.csv', delimiter=',', skiprows=1)
-y_test = np.loadtxt('./data provider/y_test.csv', delimiter=',', skiprows=1)
+X_train = np.loadtxt('./data provider/merge_X_train.csv', delimiter=',', skiprows=1)
+X_test = np.loadtxt('./data provider/merge_X_test.csv', delimiter=',', skiprows=1)
+y_train = np.loadtxt('./data provider/merge_y_train.csv', delimiter=',', skiprows=1)
+y_test = np.loadtxt('./data provider/merge_y_test.csv', delimiter=',', skiprows=1)
 
 y_lat_train = y_train[:,0]
 y_lat_test = y_test[:,0]
@@ -72,7 +72,7 @@ y_lon_train_n = (y_lon_train - lon_mean) / lon_std
 
 import json
 
-kernel_A = C(1.0, (1e-3, 1e3))*(Matern(length_scale=1.0, length_scale_bounds=(1e-2, 1e2), nu=2.5)
+kernel_A = C(1.0, (1e-3, 1e3))*(Matern(length_scale=1.0, length_scale_bounds=(1e-2, 1e2), nu=1.5)
             + WhiteKernel(noise_level=0.1, noise_level_bounds=(1e-5, 10)))
 
 kernel_B = (C(1.0, (1e-3, 1e3))
@@ -164,6 +164,8 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
           }
         )
       matern_e = gpr_results_m['summary_metrics']['mean_error_m']
+      # with open('gpr_matern_merge.json', 'w', encoding='utf-8') as f:
+      #   json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
     else: # rbf 커널인 경우에 json으로 만드는 부분
       gpr_results_r["model_type"] = "GPR"
       gpr_results_r["parameters"] = {
@@ -197,6 +199,8 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
           }
         )
       crbf_e = gpr_results_r['summary_metrics']['mean_error_m']
+      # with open('gpr_crbf_merge.json', 'w', encoding='utf-8') as f:
+      #   json.dump(gpr_results_r, f, ensure_ascii=False, indent=4)
 
 dump_result = {}
     
@@ -205,7 +209,7 @@ if matern_e < crbf_e:
 else:
   dump_result = gpr_results_r
 
-with open('gpr_result.json', 'w', encoding='utf-8') as f:
+with open('merge_gpr_result.json', 'w', encoding='utf-8') as f:
   json.dump(dump_result, f, ensure_ascii=False, indent=4)
 
 
