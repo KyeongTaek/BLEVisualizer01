@@ -41,12 +41,15 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 # A가 정해준 데이터셋(.csv)을 공통으로 사용하기 위함
-X_train = np.loadtxt('x_train_1833.csv', delimiter=',', skiprows=1)
-X_test = np.loadtxt('x_test_1833.csv', delimiter=',', skiprows=1)
-y_lat_train = np.loadtxt('y_lat_train_1833.csv', delimiter=',', skiprows=1)
-y_lat_test = np.loadtxt('y_lat_test_1833.csv', delimiter=',', skiprows=1)
-y_lon_train = np.loadtxt('y_lon_train_1833.csv', delimiter=',', skiprows=1)
-y_lon_test = np.loadtxt('y_lon_test_1833.csv', delimiter=',', skiprows=1)
+X_train = np.loadtxt('./data provider/merge_X_train.csv', delimiter=',', skiprows=1)
+X_test = np.loadtxt('./data provider/merge_X_test.csv', delimiter=',', skiprows=1)
+y_train = np.loadtxt('./data provider/merge_y_train.csv', delimiter=',', skiprows=1)
+y_test = np.loadtxt('./data provider/merge_y_test.csv', delimiter=',', skiprows=1)
+
+y_lat_train = y_train[:,0]
+y_lat_test = y_test[:,0]
+y_lon_train = y_train[:,1]
+y_lon_test = y_test[:,1]
 
 # ── 전처리: 스케일링 ──────────────────────────
 # GPR은 입력 스케일에 매우 민감 → StandardScaler 필수
@@ -57,6 +60,7 @@ X_test_s  = scaler_X.transform(X_test) # x_train 기반으로 학습한 mu와 si
 # y도 정규화 (커널 최적화 안정성을 위해)
 lat_mean, lat_std = y_lat_train.mean(), y_lat_train.std()
 lon_mean, lon_std = y_lon_train.mean(), y_lon_train.std()
+
 y_lat_train_n = (y_lat_train - lat_mean) / lat_std
 y_lon_train_n = (y_lon_train - lon_mean) / lon_std
 
@@ -68,7 +72,7 @@ y_lon_train_n = (y_lon_train - lon_mean) / lon_std
 
 import json
 
-kernel_A = C(1.0, (1e-3, 1e3))*(Matern(length_scale=1.0, length_scale_bounds=(1e-2, 1e2), nu=2.5)
+kernel_A = C(1.0, (1e-3, 1e3))*(Matern(length_scale=1.0, length_scale_bounds=(1e-2, 1e2), nu=1.5)
             + WhiteKernel(noise_level=0.1, noise_level_bounds=(1e-5, 10)))
 
 kernel_B = (C(1.0, (1e-3, 1e3))
@@ -77,6 +81,8 @@ kernel_B = (C(1.0, (1e-3, 1e3))
 
 gpr_results_m = {}
 gpr_results_r = {}
+matern_e = 0
+crbf_e = 0
 
 for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
     print(f"\n[{kernel_name} 커널] 학습 중...")
@@ -90,6 +96,7 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         kernel=kernel, alpha=1e-6,
         n_restarts_optimizer=5, random_state=42
     )
+
     gpr_lat.fit(X_train_s, y_lat_train_n) # lat 학습
     gpr_lon.fit(X_train_s, y_lon_train_n) # lon 학습
 
@@ -142,10 +149,10 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         "min_error_m": dists.min(),
         "max_error_m": dists.max()
       }
-      gpr_results_m["gpr_results"] = []
+      gpr_results_m["test_results"] = []
 
       for i in range(len(dists)):
-        gpr_results_m['gpr_results'].append(
+        gpr_results_m['test_results'].append(
           {
             "point_id": i,
             "actual_coords": [y_lat_test[i], y_lon_test[i]],
@@ -156,8 +163,9 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
             "std_lon": std_lon[i]
           }
         )
-      with open('gpr_matern_07.json', 'w', encoding='utf-8') as f:
-        json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
+      matern_e = gpr_results_m['summary_metrics']['mean_error_m']
+      # with open('gpr_matern_merge.json', 'w', encoding='utf-8') as f:
+      #   json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
     else: # rbf 커널인 경우에 json으로 만드는 부분
       gpr_results_r["model_type"] = "GPR"
       gpr_results_r["parameters"] = {
@@ -175,11 +183,11 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         "min_error_m": dists.min(),
         "max_error_m": dists.max()
       }
-      gpr_results_r["gpr_results"] = []
+      gpr_results_r["test_results"] = []
 
 
       for i in range(len(dists)):
-        gpr_results_r['gpr_results'].append(
+        gpr_results_r['test_results'].append(
           {
             "point_id": i,
             "actual_coords": [y_lat_test[i], y_lon_test[i]],
@@ -190,8 +198,19 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
             "std_lon": std_lon[i]
           }
         )
-      with open('gpr_crbf_07.json', 'w', encoding='utf-8') as f:
-        json.dump(gpr_results_r, f, ensure_ascii=False, indent=4)
+      crbf_e = gpr_results_r['summary_metrics']['mean_error_m']
+      # with open('gpr_crbf_merge.json', 'w', encoding='utf-8') as f:
+      #   json.dump(gpr_results_r, f, ensure_ascii=False, indent=4)
+
+dump_result = {}
+    
+if matern_e < crbf_e:
+  dump_result = gpr_results_m
+else:
+  dump_result = gpr_results_r
+
+with open('merge_gpr_result.json', 'w', encoding='utf-8') as f:
+  json.dump(dump_result, f, ensure_ascii=False, indent=4)
 
 
 # ── KNN vs GPR 전체 비교 ──────────────────────
@@ -218,8 +237,8 @@ print(f"{gpr_results_r['summary_metrics']['min_error_m']:>8.1f}m")
 
 # 시각화용으로 Matern 결과 사용
 # best_gpr = gpr_results['Matern']
-pred_lat_gpr = [res['pred_coords'][0] for res in gpr_results_m['gpr_results']]
-pred_lon_gpr = [res['pred_coords'][1] for res in gpr_results_m['gpr_results']]
-dists_gpr    = [res['error_m'] for res in gpr_results_m['gpr_results']]
+pred_lat_gpr = [res['pred_coords'][0] for res in gpr_results_m['test_results']]
+pred_lon_gpr = [res['pred_coords'][1] for res in gpr_results_m['test_results']]
+dists_gpr    = [res['error_m'] for res in gpr_results_m['test_results']]
 dist_gpr     = gpr_results_m['summary_metrics']['mean_error_m']
-unc_m        = [res['unc_m'] for res in gpr_results_m['gpr_results']]
+unc_m        = [res['unc_m'] for res in gpr_results_m['test_results']]

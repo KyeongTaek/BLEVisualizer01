@@ -15,7 +15,7 @@
         "min_error_m": 5.362305221193776,
         "max_error_m": 517.166965840023
     },
-    "gpr_results": [
+    "test_results": [
         {
             "point_id": 0,
             "actual_coords": [
