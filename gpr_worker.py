@@ -41,12 +41,19 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 # A가 정해준 데이터셋(.csv)을 공통으로 사용하기 위함
-X_train = np.loadtxt('x_train_1833.csv', delimiter=',', skiprows=1)
-X_test = np.loadtxt('x_test_1833.csv', delimiter=',', skiprows=1)
-y_lat_train = np.loadtxt('y_lat_train_1833.csv', delimiter=',', skiprows=1)
-y_lat_test = np.loadtxt('y_lat_test_1833.csv', delimiter=',', skiprows=1)
-y_lon_train = np.loadtxt('y_lon_train_1833.csv', delimiter=',', skiprows=1)
-y_lon_test = np.loadtxt('y_lon_test_1833.csv', delimiter=',', skiprows=1)
+X_train = np.loadtxt('\'data provider\'/X_train.csv', delimiter=',', skiprows=1)
+X_test = np.loadtxt('\'data provider\'/X_test.csv', delimiter=',', skiprows=1)
+y_train = np.loadtxt('\'data provider\'/y_train.csv', delimiter=',', skiprows=1)
+y_test = np.loadtxt('\'data provider\'/y_test.csv', delimiter=',', skiprows=1)
+
+y_lat_train = y_train[0]
+y_lat_test = y_test[0]
+y_lon_train = y_train[1]
+y_lon_test = y_test[1]
+# y_lat_train = np.loadtxt('y_lat_train_1833.csv', delimiter=',', skiprows=1)
+# y_lat_test = np.loadtxt('y_lat_test_1833.csv', delimiter=',', skiprows=1)
+# y_lon_train = np.loadtxt('y_lon_train_1833.csv', delimiter=',', skiprows=1)
+# y_lon_test = np.loadtxt('y_lon_test_1833.csv', delimiter=',', skiprows=1)
 
 # ── 전처리: 스케일링 ──────────────────────────
 # GPR은 입력 스케일에 매우 민감 → StandardScaler 필수
@@ -57,6 +64,7 @@ X_test_s  = scaler_X.transform(X_test) # x_train 기반으로 학습한 mu와 si
 # y도 정규화 (커널 최적화 안정성을 위해)
 lat_mean, lat_std = y_lat_train.mean(), y_lat_train.std()
 lon_mean, lon_std = y_lon_train.mean(), y_lon_train.std()
+
 y_lat_train_n = (y_lat_train - lat_mean) / lat_std
 y_lon_train_n = (y_lon_train - lon_mean) / lon_std
 
