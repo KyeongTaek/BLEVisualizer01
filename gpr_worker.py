@@ -149,10 +149,10 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         "min_error_m": dists.min(),
         "max_error_m": dists.max()
       }
-      gpr_results_m["gpr_results"] = []
+      gpr_results_m["test_results"] = []
 
       for i in range(len(dists)):
-        gpr_results_m['gpr_results'].append(
+        gpr_results_m['test_results'].append(
           {
             "point_id": i,
             "actual_coords": [y_lat_test[i], y_lon_test[i]],
@@ -164,8 +164,6 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
           }
         )
       matern_e = gpr_results_m['summary_metrics']['mean_error_m']
-      with open('gpr_matern_0.json', 'w', encoding='utf-8') as f:
-        json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
     else: # rbf 커널인 경우에 json으로 만드는 부분
       gpr_results_r["model_type"] = "GPR"
       gpr_results_r["parameters"] = {
@@ -183,11 +181,11 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         "min_error_m": dists.min(),
         "max_error_m": dists.max()
       }
-      gpr_results_r["gpr_results"] = []
+      gpr_results_r["test_results"] = []
 
 
       for i in range(len(dists)):
-        gpr_results_r['gpr_results'].append(
+        gpr_results_r['test_results'].append(
           {
             "point_id": i,
             "actual_coords": [y_lat_test[i], y_lon_test[i]],
@@ -199,8 +197,6 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
           }
         )
       crbf_e = gpr_results_r['summary_metrics']['mean_error_m']
-      with open('gpr_crbf_0.json', 'w', encoding='utf-8') as f:
-        json.dump(gpr_results_r, f, ensure_ascii=False, indent=4)
 
 dump_result = {}
     
@@ -208,9 +204,9 @@ if matern_e < crbf_e:
   dump_result = gpr_results_m
 else:
   dump_result = gpr_results_r
-# 이후엔 이거 쓸 예정
-# with open('gpr_result_0.json', 'w', encoding='utf-8') as f:
-#   json.dump(dump_result, f, ensure_ascii=False, indent=4)
+
+with open('gpr_result.json', 'w', encoding='utf-8') as f:
+  json.dump(dump_result, f, ensure_ascii=False, indent=4)
 
 
 # ── KNN vs GPR 전체 비교 ──────────────────────
@@ -237,8 +233,8 @@ print(f"{gpr_results_r['summary_metrics']['min_error_m']:>8.1f}m")
 
 # 시각화용으로 Matern 결과 사용
 # best_gpr = gpr_results['Matern']
-pred_lat_gpr = [res['pred_coords'][0] for res in gpr_results_m['gpr_results']]
-pred_lon_gpr = [res['pred_coords'][1] for res in gpr_results_m['gpr_results']]
-dists_gpr    = [res['error_m'] for res in gpr_results_m['gpr_results']]
+pred_lat_gpr = [res['pred_coords'][0] for res in gpr_results_m['test_results']]
+pred_lon_gpr = [res['pred_coords'][1] for res in gpr_results_m['test_results']]
+dists_gpr    = [res['error_m'] for res in gpr_results_m['test_results']]
 dist_gpr     = gpr_results_m['summary_metrics']['mean_error_m']
-unc_m        = [res['unc_m'] for res in gpr_results_m['gpr_results']]
+unc_m        = [res['unc_m'] for res in gpr_results_m['test_results']]
