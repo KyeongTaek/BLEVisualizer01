@@ -1,5 +1,9 @@
 {
     "model_type": "ensemble",
+    "parameters": {
+        "knn": 0.6,
+        "gpr": 0.4
+    },
     "summary_metrics": {
         "mean_error_m": 58.620885987538216
     },

@@ -42,6 +42,10 @@ print(f"knn mean error: {knn_data['summary_metrics']['mean_error_m']}m")
 
 ensemble_data = {
     "model_type": "ensemble",
+    "parameters": {
+      "knn": w_knn,
+      "gpr": w_gpr
+    },
     "summary_metrics":{
       "mean_error_m": mean_error
     },

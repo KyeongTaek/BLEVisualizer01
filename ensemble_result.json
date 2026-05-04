@@ -1,9 +1,13 @@
 {
     "model_type": "ensemble",
-    "knn_rate": 0.3,
-    "gpr_rate": 0.7,
-    "mean_error": 100.39761411051585,
-    "ensemble_results": [
+    "parameters": {
+        "knn": 0.3,
+        "gpr": 0.7
+    },
+    "summary_metrics": {
+        "mean_error": 100.39761411051585
+    },
+    "test_results": [
         {
             "point_id": 0,
             "actual_coords": [
