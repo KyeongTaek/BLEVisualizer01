@@ -41,19 +41,15 @@ from sklearn.preprocessing import StandardScaler
 import numpy as np
 
 # A가 정해준 데이터셋(.csv)을 공통으로 사용하기 위함
-X_train = np.loadtxt('\'data provider\'/X_train.csv', delimiter=',', skiprows=1)
-X_test = np.loadtxt('\'data provider\'/X_test.csv', delimiter=',', skiprows=1)
-y_train = np.loadtxt('\'data provider\'/y_train.csv', delimiter=',', skiprows=1)
-y_test = np.loadtxt('\'data provider\'/y_test.csv', delimiter=',', skiprows=1)
+X_train = np.loadtxt('./data provider/X_train.csv', delimiter=',', skiprows=1)
+X_test = np.loadtxt('./data provider/X_test.csv', delimiter=',', skiprows=1)
+y_train = np.loadtxt('./data provider/y_train.csv', delimiter=',', skiprows=1)
+y_test = np.loadtxt('./data provider/y_test.csv', delimiter=',', skiprows=1)
 
-y_lat_train = y_train[0]
-y_lat_test = y_test[0]
-y_lon_train = y_train[1]
-y_lon_test = y_test[1]
-# y_lat_train = np.loadtxt('y_lat_train_1833.csv', delimiter=',', skiprows=1)
-# y_lat_test = np.loadtxt('y_lat_test_1833.csv', delimiter=',', skiprows=1)
-# y_lon_train = np.loadtxt('y_lon_train_1833.csv', delimiter=',', skiprows=1)
-# y_lon_test = np.loadtxt('y_lon_test_1833.csv', delimiter=',', skiprows=1)
+y_lat_train = y_train[:,0]
+y_lat_test = y_test[:,0]
+y_lon_train = y_train[:,1]
+y_lon_test = y_test[:,1]
 
 # ── 전처리: 스케일링 ──────────────────────────
 # GPR은 입력 스케일에 매우 민감 → StandardScaler 필수
@@ -85,6 +81,8 @@ kernel_B = (C(1.0, (1e-3, 1e3))
 
 gpr_results_m = {}
 gpr_results_r = {}
+matern_e = 0
+crbf_e = 0
 
 for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
     print(f"\n[{kernel_name} 커널] 학습 중...")
@@ -98,6 +96,7 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
         kernel=kernel, alpha=1e-6,
         n_restarts_optimizer=5, random_state=42
     )
+
     gpr_lat.fit(X_train_s, y_lat_train_n) # lat 학습
     gpr_lon.fit(X_train_s, y_lon_train_n) # lon 학습
 
@@ -164,7 +163,8 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
             "std_lon": std_lon[i]
           }
         )
-      with open('gpr_matern_07.json', 'w', encoding='utf-8') as f:
+      matern_e = gpr_results_m['summary_metrics']['mean_error_m']
+      with open('gpr_matern_0.json', 'w', encoding='utf-8') as f:
         json.dump(gpr_results_m, f, ensure_ascii=False, indent=4)
     else: # rbf 커널인 경우에 json으로 만드는 부분
       gpr_results_r["model_type"] = "GPR"
@@ -198,8 +198,19 @@ for kernel_name, kernel in [('Matern', kernel_A), ('C*RBF', kernel_B)]:
             "std_lon": std_lon[i]
           }
         )
-      with open('gpr_crbf_07.json', 'w', encoding='utf-8') as f:
+      crbf_e = gpr_results_r['summary_metrics']['mean_error_m']
+      with open('gpr_crbf_0.json', 'w', encoding='utf-8') as f:
         json.dump(gpr_results_r, f, ensure_ascii=False, indent=4)
+
+dump_result = {}
+    
+if matern_e < crbf_e:
+  dump_result = gpr_results_m
+else:
+  dump_result = gpr_results_r
+# 이후엔 이거 쓸 예정
+# with open('gpr_result_0.json', 'w', encoding='utf-8') as f:
+#   json.dump(dump_result, f, ensure_ascii=False, indent=4)
 
 
 # ── KNN vs GPR 전체 비교 ──────────────────────
