@@ -70,7 +70,7 @@ def calculate_distance_m(actual, predicted):
     return distance_m
 
 
-k_values = [1, 3, 5, 7] # 4×2×2 = 16회 실험
+k_values = [1, 3, 5, 7, 9, 11, 13, 15, 17, 21]
 metrics = ["euclidean", "manhattan"]
 weights_options = ["uniform", "distance"]
 
