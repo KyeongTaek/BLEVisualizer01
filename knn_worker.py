@@ -1,12 +1,46 @@
 import json
+import sys
 import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
 
-X_train = pd.read_csv("X_train.csv")
-X_test = pd.read_csv("X_test.csv")
-y_train = pd.read_csv("y_train.csv")
-y_test = pd.read_csv("y_test.csv")
+# 실행 모드 설정
+# python knn_worker.py original  -> 원본 데이터 실험
+# python knn_worker.py merge     -> merge 데이터 실험
+mode = sys.argv[1] if len(sys.argv) > 1 else "original"
+
+if mode == "original":
+    X_train_path = "X_train.csv"
+    X_test_path = "X_test.csv"
+    y_train_path = "y_train.csv"
+    y_test_path = "y_test.csv"
+
+    error_analysis_output = "knn_error_analysis.csv"
+    json_output = "knn_result.json"
+
+elif mode == "merge":
+    X_train_path = "data provider/merge_X_train.csv"
+    X_test_path = "data provider/merge_X_test.csv"
+    y_train_path = "data provider/merge_y_train.csv"
+    y_test_path = "data provider/merge_y_test.csv"
+
+    error_analysis_output = "merge_knn_error_analysis.csv"
+    json_output = "merge_knn_result.json"
+
+
+print("=" * 60)
+print(f"KNN 실험 모드: {mode}")
+print("=" * 60)
+print("X_train:", X_train_path)
+print("X_test :", X_test_path)
+print("y_train:", y_train_path)
+print("y_test :", y_test_path)
+print()
+
+X_train = pd.read_csv(X_train_path)
+X_test = pd.read_csv(X_test_path)
+y_train = pd.read_csv(y_train_path)
+y_test = pd.read_csv(y_test_path)
 
 def remove_unnamed_columns(df):
     return df.loc[:, ~df.columns.str.contains("^Unnamed")]
@@ -143,7 +177,7 @@ error_table = pd.DataFrame(experiment_results)
 error_table = error_table.sort_values(by="mean_error_m")
 
 error_table.to_csv(
-    "knn_error_analysis.csv",
+    error_analysis_output,
     index=False,
     encoding="utf-8-sig"
 )
@@ -181,6 +215,7 @@ for i in range(len(y_test_values)):
 
 final_result = {
     "model_type": "KNN",
+    "dataset" : mode,
     "parameters": {
         "k": int(best_result["k"]),
         "metric": best_result["metric"],
@@ -198,12 +233,12 @@ final_result = {
 }
 
 
-with open("knn_result.json", "w", encoding="utf-8") as f:
+with open(json_output, "w", encoding="utf-8") as f:
     json.dump(final_result, f, indent=2, ensure_ascii=False)
 
 
 print("=" * 60)
 print("파일 저장 완료")
 print("=" * 60)
-print("knn_error_analysis.csv 저장 완료")
-print("knn_result.json 저장 완료")
+print(f"{error_analysis_output} 저장 완료")
+print(f"{json_output} 저장 완료")

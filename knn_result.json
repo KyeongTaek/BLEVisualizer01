@@ -1,5 +1,6 @@
 {
   "model_type": "KNN",
+  "dataset": "original",
   "parameters": {
     "k": 11,
     "metric": "euclidean",
