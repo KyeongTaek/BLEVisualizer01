@@ -3,10 +3,10 @@ import numpy as np
 import pandas as pd
 from sklearn.neighbors import KNeighborsRegressor
 
-X_train = pd.read_csv("data/X_train.csv")
-X_test = pd.read_csv("data/X_test.csv")
-y_train = pd.read_csv("data/y_train.csv")
-y_test = pd.read_csv("data/y_test.csv")
+X_train = pd.read_csv("X_train.csv")
+X_test = pd.read_csv("X_test.csv")
+y_train = pd.read_csv("y_train.csv")
+y_test = pd.read_csv("y_test.csv")
 
 def remove_unnamed_columns(df):
     return df.loc[:, ~df.columns.str.contains("^Unnamed")]
