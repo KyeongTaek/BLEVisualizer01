@@ -5,8 +5,7 @@
     "k": 11,
     "metric": "euclidean",
     "weights": "uniform",
-    "imputer_strategy": "constant",
-    "fill_value": -105
+    "imputer_strategy": "mean"
   },
   "summary_metrics": {
     "mean_error_m": 97.84812431451104,

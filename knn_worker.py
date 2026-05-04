@@ -220,8 +220,7 @@ final_result = {
         "k": int(best_result["k"]),
         "metric": best_result["metric"],
         "weights": best_result["weights"],
-        "imputer_strategy": "constant", # 결측치 처리 방식
-        "fill_value": -105
+        "imputer_strategy": "mean", # 결측치 처리 방식
     },
     "summary_metrics": {
         "mean_error_m": float(best_result["mean_error_m"]),

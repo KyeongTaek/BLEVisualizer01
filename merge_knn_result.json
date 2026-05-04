@@ -5,8 +5,7 @@
     "k": 3,
     "metric": "manhattan",
     "weights": "distance",
-    "imputer_strategy": "constant",
-    "fill_value": -105
+    "imputer_strategy": "mean"
   },
   "summary_metrics": {
     "mean_error_m": 60.51059889550207,
