@@ -67,6 +67,7 @@ def get_processed_data():
  
     # CSV 저장
     mac_cols = list(radio_map.columns)
+
  
     pd.DataFrame(X_train, columns=mac_cols).to_csv('X_train.csv', index=False)
     pd.DataFrame(X_test,  columns=mac_cols).to_csv('X_test.csv',  index=False)
